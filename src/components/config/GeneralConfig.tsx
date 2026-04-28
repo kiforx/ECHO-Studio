@@ -37,7 +37,7 @@ const CSV_MODE_INFO = {
     label: 'All Sets',
     summary: 'Include every enumerated set in CSV exports.',
     detail: 'Generates the largest possible CSV files. Useful for full data analysis. Warning: for large recipe sizes this can produce very large files.',
-    example: 'Recipe 5AB = 36 sets → all 36 appear in each CSV.',
+    example: 'Recipe 5AB = N sets → all N appear in each CSV.',
   },
   range: {
     label: 'Set Index Range',
@@ -179,7 +179,6 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
             <p><strong className="text-[#efefef]">What is a recipe?</strong> A recipe tells the engine how many cards of each type group to draw when forming sets.</p>
             <p><strong className="text-[#efefef]">Example:</strong> <code className="bg-[#272727] px-1.5 py-0.5 rounded text-xs">5AB</code> → draw exactly 5 cards chosen from all type-A and type-B cards combined.</p>
             <p><strong className="text-[#efefef]">Multiple groups:</strong> <code className="bg-[#272727] px-1.5 py-0.5 rounded text-xs">3AB, 2C</code> → 3 from A/B <em>and</em> 2 from C (these groups are independent — sets are the cartesian product).</p>
-            <p><strong className="text-[#efefef]">Set count:</strong> depends on how many cards of each type exist in the active deck. More cards = exponentially more sets.</p>
           </InfoBlock>
         </div>
 

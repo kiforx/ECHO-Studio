@@ -47,7 +47,7 @@ export function ConfigTab() {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/8 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
         <AlertCircle className="h-5 w-5 shrink-0" />
-        {configError ?? 'Failed to load configuration. Make sure the backend is running.'}
+        {configError ?? 'Failed to load configuration. Make sure the engine is running.'}
       </div>
     )
   }

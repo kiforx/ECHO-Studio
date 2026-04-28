@@ -35,9 +35,9 @@ export function Home() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-[#efefef] leading-none tracking-tight">
-              Echo Analysis Platform
+              Echo Studio
             </h1>
-            <p className="text-sm text-[#858585] mt-1">Card game simulation engine</p>
+            <p className="text-sm text-[#858585] mt-1">Analysis and simulation control panel</p>
           </div>
         </div>
       </header>

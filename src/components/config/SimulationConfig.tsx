@@ -49,7 +49,7 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
     <Card>
       <CardHeader>
         <CardTitle>Simulation Configuration</CardTitle>
-        <CardDescription>Monte Carlo simulation parameters</CardDescription>
+        <CardDescription>Simulation parameters</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2.5">
@@ -83,7 +83,7 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
                 <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
-                Integer seed for reproducible Monte Carlo runs. Leave empty for a random seed each
+                Integer seed for reproducible runs. Leave empty for a random seed each
                 run. Same seed + same config = identical results.
               </TooltipContent>
             </Tooltip>
