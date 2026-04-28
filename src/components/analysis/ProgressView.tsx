@@ -32,7 +32,6 @@ function formatDuration(ms: number) {
 }
 
 export function ProgressView({ events, pct, currentPhase, elapsedMs, progressDetail }: ProgressViewProps) {
-  // Build phase list dynamically from events — only show phases the backend actually runs
   const phaseMap = new Map<number, PhaseStep>()
 
   for (const ev of events) {
@@ -63,38 +62,37 @@ export function ProgressView({ events, pct, currentPhase, elapsedMs, progressDet
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Analysis Progress</CardTitle>
-          <span className="text-xs text-[hsl(210,15%,55%)]">
+          <span className="text-sm text-[#858585] font-mono">
             {formatDuration(elapsedMs)} elapsed
           </span>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {/* Overall progress bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs text-[hsl(210,15%,55%)]">
-            <span>{isComplete ? 'Complete' : hasError ? 'Failed' : currentPhase}</span>
-            <span>{Math.round(pct)}%</span>
+        <div className="space-y-2.5">
+          <div className="flex justify-between text-sm text-[#858585]">
+            <span className="font-medium">{isComplete ? 'Complete' : hasError ? 'Failed' : currentPhase}</span>
+            <span className="font-mono">{Math.round(pct)}%</span>
           </div>
           <Progress
             value={pct}
             variant={isComplete ? 'success' : 'default'}
-            className="h-2.5"
+            className="h-3"
           />
         </div>
 
-        {/* Per-phase detail: progress bar while processing, label while finalizing */}
         {progressDetail && runningStep && (
           progressDetail.is_finishing ? (
-            <p className="text-xs text-[hsl(210,15%,45%)] italic pl-1">
+            <p className="text-sm text-[#4a4a4a] italic pl-1">
               {progressDetail.stage_label}…
             </p>
           ) : (
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs text-[hsl(210,15%,45%)]">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-[#4a4a4a]">
                 <span className="font-mono">
                   {progressDetail.current} / {progressDetail.total}
                 </span>
-                <span>
+                <span className="font-mono">
                   {progressDetail.total > 0
                     ? Math.round(progressDetail.current / progressDetail.total * 100)
                     : 0}%
@@ -105,40 +103,39 @@ export function ProgressView({ events, pct, currentPhase, elapsedMs, progressDet
                   ? progressDetail.current / progressDetail.total * 100
                   : 0}
                 variant="default"
-                className="h-1"
+                className="h-1.5"
               />
-              <p className="text-xs text-[hsl(210,15%,45%)]">{progressDetail.stage_label}</p>
+              <p className="text-sm text-[#4a4a4a]">{progressDetail.stage_label}</p>
             </div>
           )
         )}
 
-        {/* Phase steps — only phases the backend actually ran */}
         {phases.length > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {phases.map((step) => (
-              <div key={step.phase} className="flex items-start gap-3 py-2">
+              <div key={step.phase} className="flex items-start gap-3 py-2.5 rounded-xl px-2 transition-colors duration-150">
                 <div className="mt-0.5 shrink-0">
                   {step.status === 'done' ? (
                     <CheckCircle className="h-4 w-4 text-[hsl(155,60%,50%)]" />
                   ) : step.status === 'running' ? (
-                    <Loader2 className="h-4 w-4 text-[hsl(210,100%,60%)] animate-spin" />
+                    <Loader2 className="h-4 w-4 text-white animate-spin" />
                   ) : step.status === 'error' ? (
                     <XCircle className="h-4 w-4 text-[hsl(355,75%,60%)]" />
                   ) : (
-                    <div className="h-4 w-4 rounded-full border-2 border-[hsl(222,20%,26%)]" />
+                    <div className="h-4 w-4 rounded-full border-2 border-[#383838]" />
                   )}
                 </div>
                 <div>
-                  <p className={`text-sm font-medium ${
-                    step.status === 'done'    ? 'text-[hsl(210,20%,94%)]'
-                    : step.status === 'running' ? 'text-[hsl(210,100%,60%)]'
+                  <p className={`text-sm font-semibold ${
+                    step.status === 'done'    ? 'text-[#efefef]'
+                    : step.status === 'running' ? 'text-white'
                     : step.status === 'error'   ? 'text-[hsl(355,75%,60%)]'
-                    : 'text-[hsl(210,10%,35%)]'
+                    : 'text-[#4a4a4a]'
                   }`}>
                     {step.name}
                   </p>
                   {step.message && (
-                    <p className="text-xs text-[hsl(210,15%,55%)] mt-0.5">{step.message}</p>
+                    <p className="text-sm text-[#858585] mt-0.5">{step.message}</p>
                   )}
                 </div>
               </div>
@@ -146,10 +143,9 @@ export function ProgressView({ events, pct, currentPhase, elapsedMs, progressDet
           </div>
         )}
 
-        {/* Placeholder while no phase events received yet */}
         {phases.length === 0 && (
-          <div className="flex items-center gap-2 text-xs text-[hsl(210,15%,55%)]">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <div className="flex items-center gap-2.5 text-sm text-[#858585]">
+            <Loader2 className="h-4 w-4 animate-spin" />
             <span>Starting…</span>
           </div>
         )}

@@ -26,32 +26,32 @@ export function ReportSelector({ reports, selected, onChange }: ReportSelectorPr
 
   const Group = ({ title, items }: { title: string; items: ReportType[] }) => (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[hsl(210,15%,55%)]">
+      <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#858585]">
         {title}
       </p>
       <div className="space-y-2">
         {items.map((report) => (
           <label
             key={report.key}
-            className="flex items-start gap-3 rounded-lg p-3 cursor-pointer border border-transparent hover:border-[hsl(222,20%,18%)] hover:bg-[hsl(222,35%,11%)] transition-colors"
+            className="flex items-start gap-3 rounded-xl p-3.5 cursor-pointer border border-transparent hover:border-[#272727] hover:bg-[#1a1a1a] transition-all duration-200"
           >
             <Checkbox
               checked={selected.includes(report.key)}
               onCheckedChange={() => toggle(report.key)}
-              className="mt-0.5"
+              className="mt-0.5 shrink-0"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-[hsl(210,20%,94%)]">{report.label}</span>
+                <span className="text-sm font-semibold text-[#efefef]">{report.label}</span>
                 <Badge variant={report.extension === 'csv' ? 'default' : 'muted'} className="text-[10px]">
                   .{report.extension}
                 </Badge>
               </div>
-              <p className="mt-0.5 text-xs text-[hsl(210,15%,55%)]">{report.description}</p>
+              <p className="mt-1 text-sm text-[#858585]">{report.description}</p>
             </div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3.5 w-3.5 text-[hsl(210,10%,35%)] mt-0.5 cursor-help shrink-0" />
+                <Info className="h-4 w-4 text-[#4a4a4a] mt-0.5 cursor-help shrink-0" />
               </TooltipTrigger>
               <TooltipContent className="max-w-64">{report.description}</TooltipContent>
             </Tooltip>
@@ -75,7 +75,7 @@ export function ReportSelector({ reports, selected, onChange }: ReportSelectorPr
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         <Group title="Text Reports (.txt)" items={txtReports} />
         <Group title="CSV Exports (.csv)" items={csvReports} />
       </CardContent>

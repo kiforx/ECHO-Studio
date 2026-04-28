@@ -59,14 +59,12 @@ export function DeckModal({
     setError(null)
   }, [existingDeck, open])
 
-  // When clone source changes, load its cards
   const handleCloneSourceChange = async (sourceVersion: string) => {
     setCloneSource(sourceVersion)
     if (!sourceVersion) return
     setCloneLoading(true)
     try {
       const deck = await fetchDeck(parseInt(sourceVersion))
-      // Deep-copy cards (new objects so edits don't affect source)
       setCards(deck.cards.map((c) => ({ ...c })))
     } catch {
       setError(`Could not load deck v${sourceVersion}`)
@@ -124,7 +122,7 @@ export function DeckModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEdit ? `Edit Deck v${existingDeck?.version}` : 'Create New Deck'}</DialogTitle>
           <DialogDescription>
@@ -132,12 +130,12 @@ export function DeckModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
           {/* ── Version + create mode (create only) ── */}
           {!isEdit && (
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label htmlFor="deck-version">Version number</Label>
                 <Input
                   id="deck-version"
@@ -148,29 +146,29 @@ export function DeckModal({
                   placeholder="e.g. 9"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label>Starting cards</Label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setCreateMode('empty'); setCards([makeBlankCard(1)]) }}
-                    className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${
+                    className={`flex-1 flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer ${
                       createMode === 'empty'
-                        ? 'border-[hsl(210,100%,60%)] bg-[hsl(210,100%,60%)]/10 text-[hsl(210,100%,60%)]'
-                        : 'border-[hsl(222,20%,18%)] text-[hsl(210,15%,55%)] hover:border-[hsl(222,20%,26%)]'
+                        ? 'border-white bg-white/10 text-white'
+                        : 'border-[#272727] text-[#858585] hover:border-[#383838] hover:text-[#efefef]'
                     }`}
                   >
-                    <Plus className="h-3.5 w-3.5 shrink-0" />
+                    <Plus className="h-4 w-4 shrink-0" />
                     Empty deck
                   </button>
                   <button
                     onClick={() => setCreateMode('clone')}
-                    className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${
+                    className={`flex-1 flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all duration-200 cursor-pointer ${
                       createMode === 'clone'
-                        ? 'border-[hsl(210,100%,60%)] bg-[hsl(210,100%,60%)]/10 text-[hsl(210,100%,60%)]'
-                        : 'border-[hsl(222,20%,18%)] text-[hsl(210,15%,55%)] hover:border-[hsl(222,20%,26%)]'
+                        ? 'border-white bg-white/10 text-white'
+                        : 'border-[#272727] text-[#858585] hover:border-[#383838] hover:text-[#efefef]'
                     }`}
                   >
-                    <Copy className="h-3.5 w-3.5 shrink-0" />
+                    <Copy className="h-4 w-4 shrink-0" />
                     Clone existing
                   </button>
                 </div>
@@ -180,16 +178,16 @@ export function DeckModal({
 
           {/* ── Clone source picker ── */}
           {!isEdit && createMode === 'clone' && (
-            <div className="rounded-lg border border-[hsl(210,100%,60%)]/20 bg-[hsl(210,100%,60%)]/5 px-4 py-3 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-[hsl(210,100%,60%)]">
+            <div className="rounded-xl border border-white/15 bg-white/5 px-5 py-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
                 <FileStack className="h-4 w-4" />
-                <span className="font-medium">Clone from existing deck</span>
+                Clone from existing deck
               </div>
-              <p className="text-xs text-[hsl(210,15%,55%)]">
+              <p className="text-sm text-[#858585]">
                 Cards are copied and pre-filled below. You can edit them freely before saving — the source deck is unchanged.
               </p>
               {clonableDecks.length === 0 ? (
-                <p className="text-xs text-[hsl(355,75%,60%)]">No existing decks to clone from.</p>
+                <p className="text-sm text-[hsl(355,75%,60%)]">No existing decks to clone from.</p>
               ) : (
                 <Select value={cloneSource} onValueChange={handleCloneSourceChange}>
                   <SelectTrigger>
@@ -205,20 +203,20 @@ export function DeckModal({
                 </Select>
               )}
               {cloneLoading && (
-                <p className="text-xs text-[hsl(210,15%,55%)] animate-pulse">Loading cards…</p>
+                <p className="text-sm text-[#858585] animate-pulse">Loading cards…</p>
               )}
             </div>
           )}
 
           {/* ── Column headers ── */}
-          <div className="grid grid-cols-[40px_80px_72px_1fr_1fr_1fr_1fr_36px] gap-2 pb-1 sticky top-0 bg-[hsl(222,40%,8%)] z-10">
-            <span />
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Type</span>
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Nominal</span>
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Present Trigger</span>
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Present Effect</span>
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Echo Trigger</span>
-            <span className="text-xs text-[hsl(210,15%,55%)] font-medium">Echo Effect</span>
+          <div className="grid grid-cols-[44px_90px_80px_1fr_1fr_1fr_1fr_40px] gap-2 pb-2 border-b border-[#272727] sticky top-0 bg-[#111111] z-10 pt-1">
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider text-center">#</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Type</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Nominal</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Present Trigger</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Present Effect</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Echo Trigger</span>
+            <span className="text-xs font-bold text-[#4a4a4a] uppercase tracking-wider pl-1">Echo Effect</span>
             <span />
           </div>
 
@@ -237,12 +235,12 @@ export function DeckModal({
           </div>
 
           <Button variant="secondary" size="sm" onClick={addCard} className="w-full">
-            <Plus className="h-3.5 w-3.5 mr-1" />
+            <Plus className="h-4 w-4 mr-1" />
             Add Card
           </Button>
 
           {error && (
-            <div className="flex items-start gap-2 rounded-lg border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/10 px-4 py-3 text-sm text-[hsl(355,75%,60%)]">
+            <div className="flex items-start gap-3 rounded-xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/10 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               {error}
             </div>

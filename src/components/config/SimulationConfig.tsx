@@ -51,13 +51,13 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
         <CardTitle>Simulation Configuration</CardTitle>
         <CardDescription>Monte Carlo simulation parameters</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
+      <CardContent className="space-y-6">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
             <Label htmlFor="max-cycles">Max Cycles</Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-[hsl(210,10%,35%)] cursor-help" />
+                <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
                 Maximum number of simulation cycles per permutation. A cycle processes all cards
@@ -75,12 +75,12 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
           />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
             <Label htmlFor="rng-seed">RNG Seed</Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-[hsl(210,10%,35%)] cursor-help" />
+                <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
                 Integer seed for reproducible Monte Carlo runs. Leave empty for a random seed each
@@ -99,7 +99,7 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-sm text-[hsl(355,75%,60%)]">
+          <div className="flex items-center gap-2.5 text-sm text-[hsl(355,75%,60%)]">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -107,11 +107,11 @@ export function SimulationConfig({ config, onSave, saving }: SimulationConfigPro
 
         <Button onClick={handleSave} disabled={saving} size="sm">
           {success ? (
-            <><CheckCircle className="h-3.5 w-3.5" /> Saved</>
+            <><CheckCircle className="h-4 w-4" /> Saved</>
           ) : saving ? (
             'Saving…'
           ) : (
-            <><Save className="h-3.5 w-3.5" /> Save</>
+            <><Save className="h-4 w-4" /> Save</>
           )}
         </Button>
       </CardContent>

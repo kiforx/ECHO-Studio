@@ -11,21 +11,20 @@ import { Card as CardUI, CardContent, CardHeader, CardTitle, CardDescription } f
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip'
 import { Badge } from '@/components/ui/Badge'
 
-// ── Info block ─────────────────────────────────────────────────────────────
 function InfoBlock({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-lg border border-[hsl(222,20%,18%)] overflow-hidden">
+    <div className="rounded-xl border border-[#272727] overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-[hsl(210,15%,55%)] hover:text-[hsl(210,20%,94%)] hover:bg-[hsl(222,35%,11%)] transition-colors cursor-pointer"
+        className="flex items-center gap-2.5 w-full px-4 py-3 text-sm text-[#858585] hover:text-[#efefef] hover:bg-[#1a1a1a] transition-all duration-200 cursor-pointer"
       >
-        {open ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
-        <Info className="h-3 w-3 shrink-0 text-[hsl(210,100%,60%)]" />
+        {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+        <Info className="h-3.5 w-3.5 shrink-0 text-[#858585]" />
         More info
       </button>
       {open && (
-        <div className="px-3 pb-3 text-xs text-[hsl(210,15%,55%)] space-y-1 border-t border-[hsl(222,20%,18%)] pt-2">
+        <div className="px-4 pb-4 text-sm text-[#858585] space-y-1.5 border-t border-[#272727] pt-3">
           {children}
         </div>
       )}
@@ -33,7 +32,6 @@ function InfoBlock({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── Mode descriptions ──────────────────────────────────────────────────────
 const CSV_MODE_INFO = {
   all: {
     label: 'All Sets',
@@ -151,15 +149,15 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
         <CardTitle>General Configuration</CardTitle>
         <CardDescription>Recipe and CSV export filtering</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
 
         {/* ── Recipe ── */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
             <Label htmlFor="recipe">Recipe</Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-[hsl(210,10%,35%)] cursor-help" />
+                <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
               </TooltipTrigger>
               <TooltipContent>
                 Defines how many cards of each type group are drawn per set.
@@ -174,24 +172,24 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
             onChange={(e) => setRecipeStr(e.target.value)}
             placeholder="e.g. 5AB"
           />
-          <p className="text-xs text-[hsl(210,10%,35%)]">
+          <p className="text-sm text-[#4a4a4a]">
             Active: {Object.entries(config.recipe).map(([k, v]) => `${v} cards from "${k}"`).join(' + ')}
           </p>
           <InfoBlock>
-            <p><strong>What is a recipe?</strong> A recipe tells the engine how many cards of each type group to draw when forming sets.</p>
-            <p><strong>Example:</strong> <code>5AB</code> → draw exactly 5 cards chosen from all type-A and type-B cards combined.</p>
-            <p><strong>Multiple groups:</strong> <code>3AB, 2C</code> → 3 from A/B <em>and</em> 2 from C (these groups are independent — sets are the cartesian product).</p>
-            <p><strong>Set count:</strong> depends on how many cards of each type exist in the active deck. More cards = exponentially more sets.</p>
+            <p><strong className="text-[#efefef]">What is a recipe?</strong> A recipe tells the engine how many cards of each type group to draw when forming sets.</p>
+            <p><strong className="text-[#efefef]">Example:</strong> <code className="bg-[#272727] px-1.5 py-0.5 rounded text-xs">5AB</code> → draw exactly 5 cards chosen from all type-A and type-B cards combined.</p>
+            <p><strong className="text-[#efefef]">Multiple groups:</strong> <code className="bg-[#272727] px-1.5 py-0.5 rounded text-xs">3AB, 2C</code> → 3 from A/B <em>and</em> 2 from C (these groups are independent — sets are the cartesian product).</p>
+            <p><strong className="text-[#efefef]">Set count:</strong> depends on how many cards of each type exist in the active deck. More cards = exponentially more sets.</p>
           </InfoBlock>
         </div>
 
         {/* ── CSV Export Mode ── */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
             <Label>CSV Export Mode</Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="h-3 w-3 text-[hsl(210,10%,35%)] cursor-help" />
+                <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
               </TooltipTrigger>
               <TooltipContent className="max-w-72">
                 {modeInfo.summary}
@@ -210,15 +208,14 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
             </SelectContent>
           </Select>
 
-          <p className="text-xs text-[hsl(210,15%,55%)]">{modeInfo.summary}</p>
+          <p className="text-sm text-[#858585]">{modeInfo.summary}</p>
 
-          {/* Dynamic sub-fields */}
           {csvMode === 'range' && (
-            <div className="rounded-lg border border-[hsl(222,20%,18%)] bg-[hsl(222,35%,11%)] p-3 space-y-3">
-              <p className="text-xs text-[hsl(210,15%,55%)]">Set index range (1-based, inclusive)</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 space-y-1">
-                  <Label htmlFor="range-start" className="text-[10px]">Start index</Label>
+            <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-3">
+              <p className="text-sm text-[#858585]">Set index range (1-based, inclusive)</p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 space-y-1.5">
+                  <Label htmlFor="range-start" className="text-xs">Start index</Label>
                   <Input
                     id="range-start"
                     type="number"
@@ -227,9 +224,9 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                     onChange={(e) => setRangeStart(e.target.value)}
                   />
                 </div>
-                <span className="text-[hsl(210,10%,35%)] mt-5">–</span>
-                <div className="flex-1 space-y-1">
-                  <Label htmlFor="range-end" className="text-[10px]">End index</Label>
+                <span className="text-[#4a4a4a] mt-6 font-bold">–</span>
+                <div className="flex-1 space-y-1.5">
+                  <Label htmlFor="range-end" className="text-xs">End index</Label>
                   <Input
                     id="range-end"
                     type="number"
@@ -240,14 +237,14 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                 </div>
               </div>
               {parseInt(rangeStart) > parseInt(rangeEnd) && (
-                <p className="text-xs text-[hsl(355,75%,60%)]">Start must be ≤ end</p>
+                <p className="text-sm text-[hsl(355,75%,60%)]">Start must be ≤ end</p>
               )}
             </div>
           )}
 
           {csvMode === 'single_set_index' && (
-            <div className="rounded-lg border border-[hsl(222,20%,18%)] bg-[hsl(222,35%,11%)] p-3 space-y-2">
-              <Label htmlFor="single-idx" className="text-[10px]">Set index (1-based)</Label>
+            <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-2.5">
+              <Label htmlFor="single-idx" className="text-xs">Set index (1-based)</Label>
               <Input
                 id="single-idx"
                 type="number"
@@ -255,21 +252,21 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                 value={singleIdx}
                 onChange={(e) => setSingleIdx(e.target.value)}
               />
-              <p className="text-xs text-[hsl(210,10%,35%)]">
+              <p className="text-sm text-[#4a4a4a]">
                 Exports exactly set #{singleIdx || '?'} from the enumeration order.
               </p>
             </div>
           )}
 
           {csvMode === 'custom_set_ids' && (
-            <div className="rounded-lg border border-[hsl(222,20%,18%)] bg-[hsl(222,35%,11%)] p-3 space-y-3">
-              <div className="flex items-center gap-1.5">
-                <p className="text-xs text-[hsl(210,15%,55%)]">
+            <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-[#858585]">
                   Select card IDs forming the set to export
                 </p>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-[hsl(210,10%,35%)] cursor-help" />
+                    <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-64">
                     These IDs identify a specific card set in the enumeration. The set whose sorted
@@ -279,7 +276,7 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                 </Tooltip>
               </div>
               {csvIds.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {csvIds.map((id) => (
                     <Badge key={id} variant={validDeckIds.has(id) ? 'default' : 'danger'}>
                       {id}
@@ -288,9 +285,9 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                 </div>
               )}
               {deckCards.length === 0 ? (
-                <p className="text-xs text-[hsl(210,10%,35%)]">No deck cards loaded.</p>
+                <p className="text-sm text-[#4a4a4a]">No deck cards loaded.</p>
               ) : (
-                <div className="grid grid-cols-6 gap-1.5">
+                <div className="grid grid-cols-6 gap-2">
                   {deckCards.map((card) => {
                     const active = csvIds.includes(card.id)
                     const invalid = active && !validDeckIds.has(card.id)
@@ -299,16 +296,16 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                         key={card.id}
                         onClick={() => toggleCsvId(card.id)}
                         title={`ID ${card.id} · ${card.type}${card.nominal}`}
-                        className={`flex flex-col items-center rounded border px-1.5 py-1.5 text-[10px] transition-all cursor-pointer ${
+                        className={`flex flex-col items-center rounded-lg border px-2 py-2.5 text-xs font-semibold transition-all duration-200 cursor-pointer ${
                           invalid
                             ? 'border-[hsl(355,75%,60%)] bg-[hsl(355,75%,60%)]/10 text-[hsl(355,75%,60%)]'
                             : active
-                            ? 'border-[hsl(210,100%,60%)] bg-[hsl(210,100%,60%)]/10 text-[hsl(210,100%,60%)]'
-                            : 'border-[hsl(222,20%,18%)] text-[hsl(210,15%,55%)] hover:border-[hsl(222,20%,26%)]'
+                            ? 'border-white bg-white/10 text-white'
+                            : 'border-[#272727] text-[#858585] hover:border-[#383838] hover:text-[#efefef]'
                         }`}
                       >
                         <span className="font-bold">{card.id}</span>
-                        <span className="opacity-60">{card.type}{card.nominal}</span>
+                        <span className="opacity-60 text-[10px] mt-0.5">{card.type}{card.nominal}</span>
                       </button>
                     )
                   })}
@@ -318,16 +315,16 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
           )}
 
           <InfoBlock>
-            <p><strong>{modeInfo.label}:</strong> {modeInfo.detail}</p>
-            <p><strong>Example:</strong> {modeInfo.example}</p>
-            <p className="mt-1 text-[hsl(210,10%,35%)]">
+            <p><strong className="text-[#efefef]">{modeInfo.label}:</strong> {modeInfo.detail}</p>
+            <p><strong className="text-[#efefef]">Example:</strong> {modeInfo.example}</p>
+            <p className="mt-1 text-[#4a4a4a]">
               ⚠ This setting only affects CSV detail exports, not the TXT reports or which analysis is performed.
             </p>
           </InfoBlock>
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 text-sm text-[hsl(355,75%,60%)]">
+          <div className="flex items-start gap-2.5 text-sm text-[hsl(355,75%,60%)]">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             {error}
           </div>
@@ -335,9 +332,9 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
 
         <Button onClick={handleSave} disabled={saving} size="sm">
           {success ? (
-            <><CheckCircle className="h-3.5 w-3.5" /> Saved</>
+            <><CheckCircle className="h-4 w-4" /> Saved</>
           ) : saving ? 'Saving…' : (
-            <><Save className="h-3.5 w-3.5" /> Save</>
+            <><Save className="h-4 w-4" /> Save</>
           )}
         </Button>
       </CardContent>

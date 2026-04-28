@@ -18,17 +18,17 @@ export function AnalysisTabWrapper() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 gap-3 text-[hsl(210,15%,55%)]">
+      <div className="flex items-center justify-center py-32 gap-3 text-[#858585]">
         <Loader2 className="h-5 w-5 animate-spin" />
-        <span>Loading…</span>
+        <span className="text-sm">Loading…</span>
       </div>
     )
   }
 
   if (!config || error) {
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/10 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
-        <AlertCircle className="h-4 w-4 shrink-0" />
+      <div className="flex items-center gap-3 rounded-2xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/8 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
+        <AlertCircle className="h-5 w-5 shrink-0" />
         {error ?? 'Failed to load configuration'}
       </div>
     )

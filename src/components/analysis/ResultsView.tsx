@@ -29,19 +29,19 @@ export function ResultsView({ jobId, files }: ResultsViewProps) {
   const FileGroup = ({ title, items }: { title: string; items: OutputFile[] }) =>
     items.length === 0 ? null : (
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[hsl(210,15%,55%)]">{title}</p>
-        <div className="space-y-1.5">
+        <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#858585]">{title}</p>
+        <div className="space-y-2">
           {items.map((file) => (
             <div
               key={file.filename}
-              className="flex items-center gap-3 rounded-lg border border-[hsl(222,20%,18%)] bg-[hsl(222,35%,11%)] px-3 py-2.5"
+              className="flex items-center gap-3 rounded-xl border border-[#272727] bg-[#1a1a1a] px-4 py-3 transition-all duration-200 hover:border-[#383838] hover:bg-[#222222]"
             >
               {file.filename.endsWith('.csv') ? (
                 <Table className="h-4 w-4 text-[hsl(155,60%,50%)] shrink-0" />
               ) : (
-                <FileText className="h-4 w-4 text-[hsl(210,100%,60%)] shrink-0" />
+                <FileText className="h-4 w-4 text-white shrink-0" />
               )}
-              <span className="flex-1 text-sm font-mono text-[hsl(210,20%,94%)] truncate">
+              <span className="flex-1 text-sm font-mono text-[#efefef] truncate">
                 {file.filename}
               </span>
               <a
@@ -49,7 +49,7 @@ export function ResultsView({ jobId, files }: ResultsViewProps) {
                 download={file.filename}
               >
                 <Button variant="ghost" size="icon-sm">
-                  <Download className="h-3.5 w-3.5" />
+                  <Download className="h-4 w-4" />
                 </Button>
               </a>
             </div>
@@ -67,12 +67,12 @@ export function ResultsView({ jobId, files }: ResultsViewProps) {
             <CardDescription>{files.length} file{files.length !== 1 ? 's' : ''} ready for download</CardDescription>
           </div>
           <Button size="sm" onClick={downloadAll}>
-            <Download className="h-3.5 w-3.5" />
+            <Download className="h-4 w-4" />
             Download All
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <FileGroup title="Text Reports" items={txtFiles} />
         <FileGroup title="CSV Exports" items={csvFiles} />
       </CardContent>

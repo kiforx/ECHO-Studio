@@ -8,9 +8,9 @@ interface ConfigPreviewProps {
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-2">
-      <span className="text-xs text-[hsl(210,15%,55%)] shrink-0">{label}</span>
-      <span className="text-sm font-medium text-[hsl(210,20%,94%)] text-right">{value}</span>
+    <div className="flex items-start justify-between gap-4 py-3">
+      <span className="text-sm text-[#858585] shrink-0">{label}</span>
+      <span className="text-sm font-semibold text-[#efefef] text-right">{value}</span>
     </div>
   )
 }
@@ -44,14 +44,14 @@ export function ConfigPreview({ config }: ConfigPreviewProps) {
         <CardDescription>Settings used for this analysis run</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="divide-y divide-[hsl(222,20%,18%)]">
+        <div className="divide-y divide-[#272727]">
           <Row label="Deck" value={
             <Badge variant="default">v{config.deck_version} — {config.cards_file}</Badge>
           } />
           <Row label="Recipe" value={recipeStr} />
           <Row label="Max Cycles" value={config.max_cycles} />
           <Row label="RNG Seed" value={
-            config.rng_seed != null ? config.rng_seed : <span className="text-[hsl(210,10%,35%)]">random</span>
+            config.rng_seed != null ? config.rng_seed : <span className="text-[#4a4a4a] italic font-normal">random</span>
           } />
           <Row label="Single-Set IDs" value={
             <span className="flex flex-wrap gap-1 justify-end">

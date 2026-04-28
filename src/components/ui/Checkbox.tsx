@@ -9,13 +9,13 @@ export function Checkbox({
   return (
     <CheckboxPrimitive.Root
       className={cn(
-        'peer h-4 w-4 shrink-0 rounded border border-[hsl(222,20%,26%)] bg-[hsl(222,40%,8%)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(210,100%,60%)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-[hsl(210,100%,60%)] data-[state=checked]:border-[hsl(210,100%,60%)] cursor-pointer transition-colors',
+        'peer h-5 w-5 shrink-0 rounded-md border border-[#383838] bg-[#111111] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-white data-[state=checked]:border-white cursor-pointer transition-all duration-200',
         className
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator className="flex items-center justify-center text-white">
-        <Check className="h-3 w-3" />
+      <CheckboxPrimitive.Indicator className="flex items-center justify-center text-[#111111]">
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

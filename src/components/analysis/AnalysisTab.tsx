@@ -33,7 +33,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef = useRef<number>(0)
 
-  // ── Timer helpers ────────────────────────────────────────────────────────
   const startTimer = (offsetMs = 0) => {
     startTimeRef.current = Date.now() - offsetMs
     timerRef.current = setInterval(() => {
@@ -44,12 +43,10 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
   }
 
-  // ── SSE attachment ───────────────────────────────────────────────────────
   const attachStream = (jid: string, resumeFromEvents: ProgressEventType[] = []) => {
     setJobId(jid)
     setEvents(resumeFromEvents)
 
-    // Restore pct from last event
     const lastPctEvent = [...resumeFromEvents].reverse().find(
       (e) => e.type === 'phase_start' || e.type === 'phase_complete'
     )
@@ -64,7 +61,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     es.onmessage = (event) => {
       const data: ProgressEventType = JSON.parse(event.data)
 
-      // Progress events update the detail counter without entering the events array
       if (data.type === 'progress') {
         setProgressDetail({
           current: data.current,
@@ -76,7 +72,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
       }
 
       setEvents((prev) => {
-        // Skip duplicates when restoring events already seen
         const alreadySeen = prev.some(
           (e) => JSON.stringify(e) === JSON.stringify(data)
         )
@@ -106,7 +101,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     }
 
     es.onerror = () => {
-      // Only treat as error if still running — otherwise server just closed the stream
       setRunState((prev) => {
         if (prev === 'running') {
           stopTimer()
@@ -118,7 +112,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     }
   }
 
-  // ── Restore active job on mount ──────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
 
@@ -139,7 +132,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
 
       if (job.status === 'running') {
         setRunState('running')
-        // Approximate elapsed time from created_at
         const created = job.created_at ? new Date(job.created_at).getTime() : Date.now()
         startTimer(Date.now() - created)
         attachStream(job.job_id)
@@ -165,7 +157,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     }
   }, [])
 
-  // ── Run ──────────────────────────────────────────────────────────────────
   const handleRun = async () => {
     setRunState('running')
     setEvents([])
@@ -186,7 +177,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     }
   }
 
-  // ── Cancel ───────────────────────────────────────────────────────────────
   const handleCancel = async () => {
     if (!jobId) return
     setCancelling(true)
@@ -203,7 +193,6 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     }
   }
 
-  // ── Reset ────────────────────────────────────────────────────────────────
   const handleReset = () => {
     esRef.current?.close()
     stopTimer()
@@ -218,31 +207,30 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
     setProgressDetail(null)
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────
   if (runState === 'loading') {
     return (
-      <div className="flex items-center justify-center py-24 gap-3 text-[hsl(210,15%,55%)]">
+      <div className="flex items-center justify-center py-32 gap-3 text-[#858585]">
         <Loader2 className="h-5 w-5 animate-spin" />
-        <span>Checking for active jobs…</span>
+        <span className="text-sm">Checking for active jobs…</span>
       </div>
     )
   }
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ConfigPreview config={config} />
         <ReportSelector reports={reports} selected={selected} onChange={setSelected} />
       </div>
 
       {/* Concurrency banner */}
       {runState === 'running' && (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-[hsl(210,100%,60%)]/30 bg-[hsl(210,100%,60%)]/8 px-5 py-3">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/15 bg-white/5 px-6 py-4">
           <div className="flex items-center gap-3">
-            <Loader2 className="h-4 w-4 animate-spin text-[hsl(210,100%,60%)] shrink-0" />
+            <Loader2 className="h-5 w-5 animate-spin text-white shrink-0" />
             <div>
-              <p className="text-sm font-medium text-[hsl(210,20%,94%)]">Analysis is running</p>
-              <p className="text-xs text-[hsl(210,15%,55%)]">
+              <p className="text-sm font-semibold text-[#efefef]">Analysis is running</p>
+              <p className="text-sm text-[#858585] mt-0.5">
                 You can navigate away — progress is saved server-side and will be restored when you return.
               </p>
             </div>
@@ -253,7 +241,7 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
             onClick={handleCancel}
             disabled={cancelling}
           >
-            <StopCircle className="h-3.5 w-3.5" />
+            <StopCircle className="h-4 w-4" />
             {cancelling ? 'Cancelling…' : 'Cancel'}
           </Button>
         </div>
@@ -263,21 +251,21 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
       <div className="flex items-center gap-3 flex-wrap">
         {runState === 'idle' && (
           <Button onClick={handleRun} disabled={selected.length === 0} size="lg">
-            <Play className="h-4 w-4" />
+            <Play className="h-5 w-5" />
             Run Analysis
           </Button>
         )}
 
         {runState === 'running' && (
           <Button variant="secondary" size="lg" disabled>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
             Analysis Running…
           </Button>
         )}
 
         {(runState === 'completed' || runState === 'failed') && (
           <Button variant="secondary" size="lg" onClick={handleReset}>
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-5 w-5" />
             {runState === 'completed' ? 'Run Again' : 'Dismiss & Reset'}
           </Button>
         )}
@@ -287,7 +275,7 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
         )}
 
         {error && runState !== 'running' && (
-          <div className="flex items-center gap-2 text-sm text-[hsl(355,75%,60%)]">
+          <div className="flex items-center gap-2.5 text-sm text-[hsl(355,75%,60%)]">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             {error}
           </div>

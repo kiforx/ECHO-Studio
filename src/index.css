@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: hsl(222, 47%, 5%);
-  --color-surface: hsl(222, 40%, 8%);
-  --color-surface-raised: hsl(222, 35%, 11%);
-  --color-surface-overlay: hsl(222, 30%, 14%);
-  --color-border: hsl(222, 20%, 18%);
-  --color-border-strong: hsl(222, 20%, 26%);
+  --color-bg: #090909;
+  --color-surface: #111111;
+  --color-surface-raised: #1a1a1a;
+  --color-surface-overlay: #222222;
+  --color-border: #272727;
+  --color-border-strong: #383838;
 
-  --color-primary: hsl(210, 100%, 60%);
-  --color-primary-hover: hsl(210, 100%, 66%);
+  --color-primary: #ffffff;
+  --color-primary-hover: #f0f0f0;
 
   --color-success: hsl(155, 60%, 50%);
   --color-warning: hsl(38, 95%, 58%);
   --color-danger: hsl(355, 75%, 60%);
 
-  --color-text: hsl(210, 20%, 94%);
-  --color-text-muted: hsl(210, 15%, 55%);
-  --color-text-faint: hsl(210, 10%, 35%);
+  --color-text: #efefef;
+  --color-text-muted: #858585;
+  --color-text-faint: #4a4a4a;
 }
 
 *, *::before, *::after {
@@ -26,9 +26,9 @@
 
 body {
   margin: 0;
-  background-color: hsl(222, 47%, 5%);
-  color: hsl(210, 20%, 94%);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #090909;
+  color: #efefef;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,7 +37,17 @@ body {
   min-height: 100vh;
 }
 
+/* Smooth tab content transitions */
+[data-state="active"].tab-content {
+  animation: tabFadeIn 200ms ease-out;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(222, 20%, 22%); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(222, 20%, 30%); }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3e3e3e; }

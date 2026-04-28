@@ -10,17 +10,17 @@ export function Progress({ className, value, variant = 'default', ...props }: Pr
   return (
     <ProgressPrimitive.Root
       className={cn(
-        'relative h-2 w-full overflow-hidden rounded-full bg-[hsl(222,35%,11%)]',
+        'relative h-2.5 w-full overflow-hidden rounded-full bg-[#1a1a1a]',
         className
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         className={cn(
-          'h-full w-full flex-1 transition-all duration-500 ease-out rounded-full',
+          'h-full w-full flex-1 transition-all duration-700 ease-out rounded-full',
           variant === 'success'
             ? 'bg-[hsl(155,60%,50%)]'
-            : 'bg-[hsl(210,100%,60%)]'
+            : 'bg-white'
         )}
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
