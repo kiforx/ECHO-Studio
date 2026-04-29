@@ -1,35 +1,25 @@
-import { useEffect, useState } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Layers } from 'lucide-react'
 import type { Config } from '@/types'
-import { fetchConfig } from '@/api/config'
 import { AnalysisTab } from './AnalysisTab'
 
-export function AnalysisTabWrapper() {
-  const [config, setConfig] = useState<Config | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+interface AnalysisTabWrapperProps {
+  config: Config | null
+  noDeck: boolean
+}
 
-  useEffect(() => {
-    fetchConfig()
-      .then(setConfig)
-      .catch(() => setError('Failed to load config'))
-      .finally(() => setLoading(false))
-  }, [])
-
-  if (loading) {
+export function AnalysisTabWrapper({ config, noDeck }: AnalysisTabWrapperProps) {
+  if (noDeck || !config) {
     return (
-      <div className="flex items-center justify-center py-32 gap-3 text-[#858585]">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        <span className="text-sm">Loading…</span>
-      </div>
-    )
-  }
-
-  if (!config || error) {
-    return (
-      <div className="flex items-center gap-3 rounded-2xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/8 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
-        <AlertCircle className="h-5 w-5 shrink-0" />
-        {error ?? 'Failed to load configuration'}
+      <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-[#272727]">
+          <Layers className="h-6 w-6 text-[#4a4a4a]" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-[#858585]">No deck configured</p>
+          <p className="text-sm text-[#4a4a4a] mt-1">
+            Go to <strong className="text-[#858585]">Configurations → Deck Management</strong> and create a deck first.
+          </p>
+        </div>
       </div>
     )
   }

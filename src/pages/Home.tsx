@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { Settings2, BarChart3, Zap } from 'lucide-react'
+import { Settings2, BarChart3, Zap, Loader2, AlertCircle } from 'lucide-react'
+import type { Card } from '@/types'
+import { useConfig } from '@/hooks/useConfig'
+import { useDecks } from '@/hooks/useDecks'
+import { fetchDeck } from '@/api/decks'
 import { ConfigTab } from '@/components/config/ConfigTab'
 import { AnalysisTabWrapper } from '@/components/analysis/AnalysisTabWrapper'
 import { cn } from '@/lib/utils'
@@ -23,7 +27,58 @@ function TabTrigger({ value, icon: Icon, label }: { value: string; icon: React.E
 }
 
 export function Home() {
+  const { config, loading: configLoading, saving, error: configError, save, reload: reloadConfig } = useConfig()
+  const { decks, loading: decksLoading, reload: reloadDecks } = useDecks()
+  const [deckCards, setDeckCards] = useState<Card[]>([])
   const [activeTab, setActiveTab] = useState('config')
+
+  // noDeck: no decks exist, or the configured deck_version is not in the deck list
+  const noDeck =
+    !config ||
+    decks.length === 0 ||
+    config.deck_version === null ||
+    !decks.find((d) => d.version === config.deck_version)
+
+  // Load cards for the active deck reactively
+  useEffect(() => {
+    if (noDeck || !config || config.deck_version === null) {
+      setDeckCards([])
+      return
+    }
+    fetchDeck(config.deck_version)
+      .then((d) => setDeckCards(d.cards))
+      .catch(() => setDeckCards([]))
+  }, [config?.deck_version, decks, noDeck])
+
+  // After any deck mutation, reload decks AND config (deletion resets deck_version on the server)
+  const handleDecksChanged = () => {
+    reloadDecks()
+    reloadConfig()
+  }
+
+  const loading = configLoading || decksLoading
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#090909]">
+        <div className="flex items-center gap-3 text-[#858585]">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">Loading…</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (!config && configError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#090909] px-8">
+        <div className="flex items-center gap-3 rounded-2xl border border-[hsl(355,75%,60%)]/30 bg-[hsl(355,75%,60%)]/8 px-5 py-4 text-sm text-[hsl(355,75%,60%)]">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          {configError}. Make sure the engine is running.
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -59,13 +114,23 @@ export function Home() {
               value="config"
               className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
             >
-              <ConfigTab />
+              {config && (
+                <ConfigTab
+                  config={config}
+                  save={save}
+                  saving={saving}
+                  decks={decks}
+                  deckCards={deckCards}
+                  noDeck={noDeck}
+                  onDecksChanged={handleDecksChanged}
+                />
+              )}
             </TabsPrimitive.Content>
             <TabsPrimitive.Content
               value="analysis"
               className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
             >
-              <AnalysisTabWrapper />
+              <AnalysisTabWrapper config={config} noDeck={noDeck} />
             </TabsPrimitive.Content>
           </div>
         </div>

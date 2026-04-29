@@ -1,4 +1,5 @@
 import { api } from './client'
+import { getClientId } from '@/lib/client-id'
 import type { Config, JobSummary } from '@/types'
 
 export async function runAnalysis(payload: {
@@ -24,9 +25,15 @@ export async function cancelJob(jobId: string): Promise<void> {
 }
 
 export function openEventStream(jobId: string): EventSource {
+  // EventSource cannot send custom headers; job_id IS the client_id so path-based routing works
   return new EventSource(`http://localhost:8000/api/v1/analysis/${jobId}/events`)
 }
 
 export function buildDownloadUrl(jobId: string, filename: string): string {
   return `http://localhost:8000/api/v1/analysis/${jobId}/download/${filename}`
+}
+
+/** Returns the stable job_id for the current client (= clientId). */
+export function getLocalJobId(): string {
+  return getClientId()
 }

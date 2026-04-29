@@ -34,5 +34,5 @@ export function useConfig() {
     }
   }, [])
 
-  return { config, loading, saving, error, save, reload }
+  return { config, loading, saving, error, save, reload: reload }
 }

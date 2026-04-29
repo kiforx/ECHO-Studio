@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Info, Save, AlertCircle, CheckCircle, ChevronDown, ChevronRight } from 'lucide-react'
-import type { Card, Config } from '@/types'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Info, Save, AlertCircle, CheckCircle, ChevronDown, ChevronRight, Layers } from 'lucide-react'
+import type { Card, Config, DeckSummary } from '@/types'
+import { fetchSetCount } from '@/api/config'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
@@ -62,11 +63,13 @@ const CSV_MODE_INFO = {
 interface GeneralConfigProps {
   config: Config
   deckCards: Card[]
+  decks: DeckSummary[]
+  noDeck: boolean
   onSave: (patch: Partial<Config>) => Promise<Config>
   saving: boolean
 }
 
-export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConfigProps) {
+export function GeneralConfig({ config, deckCards, decks, noDeck, onSave, saving }: GeneralConfigProps) {
   const [recipeStr, setRecipeStr] = useState('')
   const [csvMode, setCsvMode] = useState<Config['csv_export_mode']>(config.csv_export_mode)
   const [rangeStart, setRangeStart] = useState(String(config.csv_set_range?.[0] ?? 1))
@@ -75,6 +78,13 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
   const [csvIds, setCsvIds] = useState<number[]>(config.csv_custom_set_ids ?? [])
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [setCount, setSetCount] = useState<number | null>(null)
+  const [deckSaving, setDeckSaving] = useState(false)
+
+  const setCountTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Ref so the deckCards cleanup effect can read the latest csvIds without being a dependency.
+  const csvIdsRef = useRef(csvIds)
+  csvIdsRef.current = csvIds
 
   useEffect(() => {
     const parts = Object.entries(config.recipe).map(([k, v]) => `${v}${k}`)
@@ -85,6 +95,37 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
     setSingleIdx(String(config.csv_single_set_index ?? 1))
     setCsvIds(config.csv_custom_set_ids ?? [])
   }, [config])
+
+  // When deckCards changes, drop any csv_custom_set_ids that no longer exist and auto-save.
+  // Guard: skip while deckCards is empty (deck still loading).
+  useEffect(() => {
+    if (deckCards.length === 0) return
+    const validIds = new Set(deckCards.map((c) => c.id))
+    const current = csvIdsRef.current
+    if (!current.some((id) => !validIds.has(id))) return
+    const cleaned = current.filter((id) => validIds.has(id))
+    setCsvIds(cleaned)
+    onSave({ csv_custom_set_ids: cleaned }).catch(() => {})
+  }, [deckCards, onSave])
+
+  // Fetch set count whenever recipe or deck version changes (debounced)
+  const refreshSetCount = useCallback((recipe: Record<string, number>, deckVersion: number) => {
+    if (setCountTimerRef.current) clearTimeout(setCountTimerRef.current)
+    setCountTimerRef.current = setTimeout(() => {
+      fetchSetCount(recipe, deckVersion)
+        .then(setSetCount)
+        .catch(() => setSetCount(null))
+    }, 400)
+  }, [])
+
+  useEffect(() => {
+    const parsed = parseRecipe(recipeStr)
+    if (parsed && config.deck_version != null) {
+      refreshSetCount(parsed, config.deck_version)
+    } else {
+      setSetCount(null)
+    }
+  }, [recipeStr, config.deck_version, refreshSetCount])
 
   const parseRecipe = (raw: string): Record<string, number> | null => {
     const result: Record<string, number> = {}
@@ -104,14 +145,21 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
 
   const validate = (): string | null => {
     if (!parseRecipe(recipeStr)) return 'Invalid recipe format. Use e.g. "5AB" or "3A, 2B"'
+    if (setCount !== null && setCount === 0) return 'Recipe is impossible: no cards match this combination'
     if (csvMode === 'range') {
       const s = parseInt(rangeStart), e = parseInt(rangeEnd)
       if (isNaN(s) || isNaN(e) || s < 1 || e < s)
         return 'Range: start must be ≥ 1 and start must be ≤ end'
+      if (setCount !== null && e > setCount)
+        return `Range end (${e}) exceeds the total number of sets (${setCount})`
+      if (setCount !== null && s > setCount)
+        return `Range start (${s}) exceeds the total number of sets (${setCount})`
     }
     if (csvMode === 'single_set_index') {
       const idx = parseInt(singleIdx)
       if (isNaN(idx) || idx < 1) return 'Single index must be ≥ 1'
+      if (setCount !== null && idx > setCount)
+        return `Index ${idx} does not exist — only ${setCount} set${setCount === 1 ? '' : 's'} available`
     }
     if (csvMode === 'custom_set_ids' && csvIds.length === 0)
       return 'Select at least one card ID for CSV export'
@@ -141,15 +189,71 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
     }
   }
 
+  const handleDeckSwitch = async (version: string) => {
+    setDeckSaving(true)
+    try {
+      await onSave({ deck_version: parseInt(version) })
+    } catch (e: any) {
+      setError(e?.response?.data?.detail ?? 'Failed to switch deck')
+    } finally {
+      setDeckSaving(false)
+    }
+  }
+
   const modeInfo = CSV_MODE_INFO[csvMode]
 
   return (
     <CardUI>
       <CardHeader>
         <CardTitle>General Configuration</CardTitle>
-        <CardDescription>Recipe and CSV export filtering</CardDescription>
+        <CardDescription>Active deck, recipe, and CSV export filtering</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+
+        {/* ── Active Deck Selector ── */}
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2">
+            <Label>Active Deck</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-[#4a4a4a] cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                Select which deck version is used for analysis. Create decks in the Deck Management section below.
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          {decks.length === 0 ? (
+            <div className="flex items-center gap-3 rounded-xl border border-[#272727] bg-[#1a1a1a] px-4 py-3">
+              <Layers className="h-4 w-4 text-[#4a4a4a] shrink-0" />
+              <p className="text-sm text-[#858585]">No decks found. Please create a deck first.</p>
+            </div>
+          ) : (
+            <Select
+              value={String(config.deck_version)}
+              onValueChange={handleDeckSwitch}
+              disabled={deckSaving}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select deck…" />
+              </SelectTrigger>
+              <SelectContent>
+                {decks.map((d) => (
+                  <SelectItem key={d.version} value={String(d.version)}>
+                    version_{d.version}.json — {d.card_count} cards ({d.types.join('/')})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {decks.length > 0 && (
+            <p className="text-sm text-[#4a4a4a]">
+              Active: version_{config.deck_version}.json
+            </p>
+          )}
+        </div>
 
         {/* ── Recipe ── */}
         <div className="space-y-2.5">
@@ -172,9 +276,19 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
             onChange={(e) => setRecipeStr(e.target.value)}
             placeholder="e.g. 5AB"
           />
-          <p className="text-sm text-[#4a4a4a]">
-            Active: {Object.entries(config.recipe).map(([k, v]) => `${v} cards from "${k}"`).join(' + ')}
-          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="text-sm text-[#4a4a4a]">
+              Active: {Object.entries(config.recipe).map(([k, v]) => `${v} cards from "${k}"`).join(' + ')}
+            </p>
+            {setCount !== null && (
+              <Badge variant="muted">{setCount.toLocaleString()} sets</Badge>
+            )}
+          </div>
+          {setCount !== null && setCount === 0 && parseRecipe(recipeStr) && (
+            <p className="text-sm text-[hsl(355,75%,60%)]">
+              This recipe produces 0 sets — check card type availability in the active deck.
+            </p>
+          )}
           <InfoBlock>
             <p><strong className="text-[#efefef]">What is a recipe?</strong> A recipe tells the engine how many cards of each type group to draw when forming sets.</p>
             <p><strong className="text-[#efefef]">Example:</strong> <code className="bg-[#272727] px-1.5 py-0.5 rounded text-xs">5AB</code> → draw exactly 5 cards chosen from all type-A and type-B cards combined.</p>
@@ -211,7 +325,10 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
 
           {csvMode === 'range' && (
             <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-3">
-              <p className="text-sm text-[#858585]">Set index range (1-based, inclusive)</p>
+              <p className="text-sm text-[#858585]">
+                Set index range (1-based, inclusive)
+                {setCount !== null && <span className="ml-2 text-[#4a4a4a]">· {setCount.toLocaleString()} sets available</span>}
+              </p>
               <div className="flex items-center gap-3">
                 <div className="flex-1 space-y-1.5">
                   <Label htmlFor="range-start" className="text-xs">Start index</Label>
@@ -219,6 +336,7 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                     id="range-start"
                     type="number"
                     min={1}
+                    max={setCount ?? undefined}
                     value={rangeStart}
                     onChange={(e) => setRangeStart(e.target.value)}
                   />
@@ -230,38 +348,54 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
                     id="range-end"
                     type="number"
                     min={1}
+                    max={setCount ?? undefined}
                     value={rangeEnd}
                     onChange={(e) => setRangeEnd(e.target.value)}
                   />
                 </div>
               </div>
-              {parseInt(rangeStart) > parseInt(rangeEnd) && (
-                <p className="text-sm text-[hsl(355,75%,60%)]">Start must be ≤ end</p>
-              )}
+              {(() => {
+                const s = parseInt(rangeStart), e = parseInt(rangeEnd)
+                if (!isNaN(s) && !isNaN(e) && s > e)
+                  return <p className="text-sm text-[hsl(355,75%,60%)]">Start must be ≤ end</p>
+                if (setCount !== null && !isNaN(e) && e > setCount)
+                  return <p className="text-sm text-[hsl(355,75%,60%)]">End ({e}) exceeds max sets ({setCount})</p>
+                return null
+              })()}
             </div>
           )}
 
           {csvMode === 'single_set_index' && (
             <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-2.5">
-              <Label htmlFor="single-idx" className="text-xs">Set index (1-based)</Label>
+              <Label htmlFor="single-idx" className="text-xs">
+                Set index (1-based{setCount !== null ? `, max ${setCount.toLocaleString()}` : ''})
+              </Label>
               <Input
                 id="single-idx"
                 type="number"
                 min={1}
+                max={setCount ?? undefined}
                 value={singleIdx}
                 onChange={(e) => setSingleIdx(e.target.value)}
               />
-              <p className="text-sm text-[#4a4a4a]">
-                Exports exactly set #{singleIdx || '?'} from the enumeration order.
-              </p>
+              {setCount !== null && parseInt(singleIdx) > setCount && (
+                <p className="text-sm text-[hsl(355,75%,60%)]">
+                  Index {singleIdx} does not exist — only {setCount.toLocaleString()} sets available
+                </p>
+              )}
+              {!(setCount !== null && parseInt(singleIdx) > setCount) && (
+                <p className="text-sm text-[#4a4a4a]">
+                  Exports exactly set #{singleIdx || '?'} from the enumeration order.
+                </p>
+              )}
             </div>
           )}
 
           {csvMode === 'custom_set_ids' && (
-            <div className="rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-3">
+            <div className={`rounded-xl border border-[#272727] bg-[#1a1a1a] p-4 space-y-3 ${noDeck ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-[#858585]">
-                  Select card IDs forming the set to export
+                  {noDeck ? 'No active deck — create a deck first' : 'Select card IDs forming the set to export'}
                 </p>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -329,7 +463,12 @@ export function GeneralConfig({ config, deckCards, onSave, saving }: GeneralConf
           </div>
         )}
 
-        <Button onClick={handleSave} disabled={saving} size="sm">
+        <Button
+          onClick={handleSave}
+          disabled={saving || (noDeck && csvMode === 'custom_set_ids')}
+          size="sm"
+          title={noDeck && csvMode === 'custom_set_ids' ? 'Create a deck first' : undefined}
+        >
           {success ? (
             <><CheckCircle className="h-4 w-4" /> Saved</>
           ) : saving ? 'Saving…' : (

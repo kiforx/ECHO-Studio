@@ -25,7 +25,7 @@ export interface DeckDetail {
 }
 
 export interface Config {
-  deck_version: number
+  deck_version: number | null
   cards_file: string
   recipe: Record<string, number>
   max_cycles: number

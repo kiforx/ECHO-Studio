@@ -14,6 +14,7 @@ import {
 
 interface DeckManagementProps {
   constants: Constants
+  onChanged?: () => void
 }
 
 function TruncatedCell({ text }: { text: string }) {
@@ -32,7 +33,7 @@ function TruncatedCell({ text }: { text: string }) {
   )
 }
 
-export function DeckManagement({ constants }: DeckManagementProps) {
+export function DeckManagement({ constants, onChanged }: DeckManagementProps) {
   const { decks, loading, reload, getDeck, create, update, remove } = useDecks()
   const [modalOpen, setModalOpen] = useState(false)
   const [viewDeck, setViewDeck] = useState<DeckDetail | null>(null)
@@ -62,6 +63,7 @@ export function DeckManagement({ constants }: DeckManagementProps) {
     } else {
       await create(version, cards)
     }
+    onChanged?.()
   }
 
   const handleDelete = async () => {
@@ -70,6 +72,7 @@ export function DeckManagement({ constants }: DeckManagementProps) {
     await remove(deleteVersion)
     setDeleteVersion(null)
     setDeleting(false)
+    onChanged?.()
   }
 
   return (

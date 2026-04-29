@@ -21,12 +21,14 @@ function csvModeLabel(cfg: Config): React.ReactNode {
     case 'range': return `Sets ${cfg.csv_set_range[0]}–${cfg.csv_set_range[1]}`
     case 'single_set_index': return `Set #${cfg.csv_single_set_index}`
     case 'custom_set_ids':
-      return (
+      return cfg.csv_custom_set_ids.length > 0 ? (
         <span className="flex flex-wrap gap-1 justify-end">
           {cfg.csv_custom_set_ids.map((id) => (
             <Badge key={id} variant="muted">{id}</Badge>
           ))}
         </span>
+      ) : (
+        <span className="text-[#4a4a4a] italic font-normal">no IDs selected</span>
       )
     default: return cfg.csv_export_mode
   }
@@ -37,6 +39,10 @@ export function ConfigPreview({ config }: ConfigPreviewProps) {
     .map(([k, v]) => `${v}${k}`)
     .join(' + ')
 
+  const deckLabel = config.deck_version != null
+    ? `v${config.deck_version}`
+    : null
+
   return (
     <Card>
       <CardHeader>
@@ -46,7 +52,9 @@ export function ConfigPreview({ config }: ConfigPreviewProps) {
       <CardContent>
         <div className="divide-y divide-[#272727]">
           <Row label="Deck" value={
-            <Badge variant="default">v{config.deck_version} — {config.cards_file}</Badge>
+            deckLabel
+              ? <Badge variant="default">{deckLabel} — {config.cards_file}</Badge>
+              : <span className="text-[hsl(355,75%,60%)] text-sm">No deck configured</span>
           } />
           <Row label="Recipe" value={recipeStr} />
           <Row label="Max Cycles" value={config.max_cycles} />
@@ -54,11 +62,15 @@ export function ConfigPreview({ config }: ConfigPreviewProps) {
             config.rng_seed != null ? config.rng_seed : <span className="text-[#4a4a4a] italic font-normal">random</span>
           } />
           <Row label="Single-Set IDs" value={
-            <span className="flex flex-wrap gap-1 justify-end">
-              {config.custom_set_ids.map((id) => (
-                <Badge key={id} variant="muted">{id}</Badge>
-              ))}
-            </span>
+            config.custom_set_ids.length > 0 ? (
+              <span className="flex flex-wrap gap-1 justify-end">
+                {config.custom_set_ids.map((id) => (
+                  <Badge key={id} variant="muted">{id}</Badge>
+                ))}
+              </span>
+            ) : (
+              <span className="text-[#4a4a4a] italic font-normal">none</span>
+            )
           } />
           <Row label="CSV Filter" value={csvModeLabel(config)} />
         </div>

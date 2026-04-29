@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Info, Save, CheckCircle, AlertCircle, X } from 'lucide-react'
 import type { Card, Config } from '@/types'
 import { Button } from '@/components/ui/Button'
@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/Tooltip
 interface CustomSetIdsProps {
   config: Config
   deckCards: Card[]
+  noDeck: boolean
   onSave: (patch: Partial<Config>) => Promise<Config>
   saving: boolean
 }
@@ -42,15 +43,33 @@ function CardPreviewTooltip({ card }: { card: Card }) {
   )
 }
 
-export function CustomSetIds({ config, deckCards, onSave, saving }: CustomSetIdsProps) {
+export function CustomSetIds({ config, deckCards, noDeck, onSave, saving }: CustomSetIdsProps) {
   const [selected, setSelected] = useState<number[]>(config.custom_set_ids)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  // Keep a ref so the cleanup effect always reads the latest selection
+  // without needing it as a dependency (which would cause an infinite loop).
+  const selectedRef = useRef(selected)
+  selectedRef.current = selected
 
   useEffect(() => {
     setSelected(config.custom_set_ids)
     setError(null)
   }, [config.custom_set_ids])
+
+  // When deckCards changes, drop any IDs that no longer exist and auto-save.
+  // Guard: skip while deckCards is empty (deck still loading).
+  useEffect(() => {
+    if (deckCards.length === 0) return
+    const validIds = new Set(deckCards.map((c) => c.id))
+    const current = selectedRef.current
+    if (!current.some((id) => !validIds.has(id))) return
+    const cleaned = current.filter((id) => validIds.has(id))
+    setSelected(cleaned)
+    setError(null)
+    onSave({ custom_set_ids: cleaned }).catch(() => {})
+  }, [deckCards, onSave])
 
   const validIds = new Set(deckCards.map((c) => c.id))
   const hasInvalid = selected.some((id) => !validIds.has(id))
@@ -133,7 +152,9 @@ export function CustomSetIds({ config, deckCards, onSave, saving }: CustomSetIds
         )}
 
         {/* Card grid picker with hover previews */}
-        {deckCards.length === 0 ? (
+        {noDeck ? (
+          <p className="text-sm text-[#858585]">No active deck. Create a deck in Deck Management below.</p>
+        ) : deckCards.length === 0 ? (
           <p className="text-sm text-[#858585]">No cards in active deck.</p>
         ) : (
           <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6 lg:grid-cols-10">
@@ -177,7 +198,7 @@ export function CustomSetIds({ config, deckCards, onSave, saving }: CustomSetIds
           </div>
         )}
 
-        <Button onClick={handleSave} disabled={saving || selected.length === 0} size="sm">
+        <Button onClick={handleSave} disabled={saving || selected.length === 0 || noDeck} size="sm">
           {success ? (
             <><CheckCircle className="h-4 w-4" /> Saved</>
           ) : saving ? (
