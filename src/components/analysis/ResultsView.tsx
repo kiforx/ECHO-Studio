@@ -2,7 +2,7 @@ import { Download, FileText, Table } from 'lucide-react'
 import type { OutputFile } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { buildDownloadUrl } from '@/api/analysis'
+import { buildDownloadUrl, buildDownloadZipUrl } from '@/api/analysis'
 
 interface ResultsViewProps {
   jobId: string
@@ -10,21 +10,11 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ jobId, files }: ResultsViewProps) {
-  const downloadAll = () => {
-    for (const file of files) {
-      const a = document.createElement('a')
-      a.href = buildDownloadUrl(jobId, file.filename)
-      a.download = file.filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    }
-  }
-
   if (files.length === 0) return null
 
   const txtFiles = files.filter((f) => f.filename.endsWith('.txt'))
   const csvFiles = files.filter((f) => f.filename.endsWith('.csv'))
+  const zipUrl = buildDownloadZipUrl(jobId)
 
   const FileGroup = ({ title, items }: { title: string; items: OutputFile[] }) =>
     items.length === 0 ? null : (
@@ -66,10 +56,12 @@ export function ResultsView({ jobId, files }: ResultsViewProps) {
             <CardTitle>Generated Files</CardTitle>
             <CardDescription>{files.length} file{files.length !== 1 ? 's' : ''} ready for download</CardDescription>
           </div>
-          <Button size="sm" onClick={downloadAll}>
-            <Download className="h-4 w-4" />
-            Download All
-          </Button>
+          <a href={zipUrl} download="echo-analysis.zip">
+            <Button size="sm">
+              <Download className="h-4 w-4" />
+              Download All
+            </Button>
+          </a>
         </div>
       </CardHeader>
       <CardContent className="space-y-5">

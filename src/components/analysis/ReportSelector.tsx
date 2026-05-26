@@ -67,7 +67,9 @@ export function ReportSelector({ reports, selected, onChange }: ReportSelectorPr
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Output File Selection</CardTitle>
-            <CardDescription>Choose which reports to generate</CardDescription>
+            <CardDescription>
+              {selected.length} / {reports.length} selected
+            </CardDescription>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={selectAll}>Select all</Button>

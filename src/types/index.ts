@@ -76,3 +76,5 @@ export type ProgressEventType =
   | { type: 'complete'; files: OutputFile[] }
   | { type: 'error'; message: string }
   | { type: 'progress'; analysis_type: string; current: number; total: number; percent: number; stage_label: string; is_finishing: boolean }
+  | { type: 'file_plan'; selected_keys: string[]; selected_count: number }
+  | { type: 'file_summary'; selected_count: number; generated_count: number; skipped_count: number; skipped_keys: string[] }
