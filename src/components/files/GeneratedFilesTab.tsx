@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Download, FileText, Table, Trash2, FolderOpen, RefreshCw } from 'lucide-react'
-import { useGeneratedFiles } from '@/hooks/useGeneratedFiles'
+import type { GeneratedFile } from '@/types'
 import { buildFileDownloadUrl } from '@/api/files'
 import { formatBytes } from '@/lib/format-bytes'
 import { Button } from '@/components/ui/Button'
@@ -10,8 +10,16 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/Dialog'
 
-export function GeneratedFilesTab() {
-  const { files, totalSizeBytes, loading, error, reload, remove } = useGeneratedFiles()
+interface GeneratedFilesTabProps {
+  files: GeneratedFile[]
+  totalSizeBytes: number
+  loading: boolean
+  error: string | null
+  reload: () => void
+  remove: (filename: string) => Promise<void>
+}
+
+export function GeneratedFilesTab({ files, totalSizeBytes, loading, error, reload, remove }: GeneratedFilesTabProps) {
   const [deleteFilename, setDeleteFilename] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -100,7 +108,7 @@ export function GeneratedFilesTab() {
           <DialogHeader>
             <DialogTitle>Delete this file?</DialogTitle>
             <DialogDescription>
-              This will permanently delete <strong>{deleteFilename}</strong>. This action cannot be undone.
+              This will permanently delete <strong className="break-all">{deleteFilename}</strong>. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

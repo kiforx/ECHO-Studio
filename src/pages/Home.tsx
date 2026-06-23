@@ -4,6 +4,7 @@ import { Settings2, BarChart3, FolderOpen, Zap, Loader2, AlertCircle } from 'luc
 import type { Card } from '@/types'
 import { useConfig } from '@/hooks/useConfig'
 import { useDecks } from '@/hooks/useDecks'
+import { useGeneratedFiles } from '@/hooks/useGeneratedFiles'
 import { fetchDeck } from '@/api/decks'
 import { ConfigTab } from '@/components/config/ConfigTab'
 import { AnalysisTabWrapper } from '@/components/analysis/AnalysisTabWrapper'
@@ -30,6 +31,7 @@ function TabTrigger({ value, icon: Icon, label }: { value: string; icon: React.E
 export function Home() {
   const { config, loading: configLoading, saving, error: configError, save, reload: reloadConfig } = useConfig()
   const { decks, loading: decksLoading, reload: reloadDecks } = useDecks()
+  const generatedFiles = useGeneratedFiles()
   const [deckCards, setDeckCards] = useState<Card[]>([])
   const [activeTab, setActiveTab] = useState('config')
 
@@ -132,13 +134,26 @@ export function Home() {
               value="analysis"
               className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
             >
-              <AnalysisTabWrapper config={config} noDeck={noDeck} />
+              <AnalysisTabWrapper
+                config={config}
+                noDeck={noDeck}
+                generatedFiles={generatedFiles.files}
+                filesLoading={generatedFiles.loading}
+                onAnalysisFilesChanged={generatedFiles.reload}
+              />
             </TabsPrimitive.Content>
             <TabsPrimitive.Content
               value="files"
               className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
             >
-              <GeneratedFilesTab />
+              <GeneratedFilesTab
+                files={generatedFiles.files}
+                totalSizeBytes={generatedFiles.totalSizeBytes}
+                loading={generatedFiles.loading}
+                error={generatedFiles.error}
+                reload={generatedFiles.reload}
+                remove={generatedFiles.remove}
+              />
             </TabsPrimitive.Content>
           </div>
         </div>

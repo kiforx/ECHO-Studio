@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play, StopCircle, RotateCcw, AlertTriangle, Loader2 } from 'lucide-react'
-import type { Config, OutputFile, ProgressEventType, ReportType } from '@/types'
+import type { Config, GeneratedFile, OutputFile, ProgressEventType, ReportType } from '@/types'
 import { fetchAvailableReports } from '@/api/reports'
 import { runAnalysis, openEventStream, fetchCurrentJob, cancelJob } from '@/api/analysis'
 import { Button } from '@/components/ui/Button'
@@ -11,11 +11,14 @@ import { ResultsView } from './ResultsView'
 
 interface AnalysisTabProps {
   config: Config
+  generatedFiles: GeneratedFile[]
+  filesLoading: boolean
+  onFilesChanged: () => void
 }
 
 type RunState = 'loading' | 'idle' | 'running' | 'completed' | 'failed'
 
-export function AnalysisTab({ config }: AnalysisTabProps) {
+export function AnalysisTab({ config, generatedFiles, filesLoading, onFilesChanged }: AnalysisTabProps) {
   const [reports, setReports] = useState<ReportType[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [runState, setRunState] = useState<RunState>('loading')
@@ -92,6 +95,7 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
         setRunState('completed')
         stopTimer()
         es.close()
+        onFilesChanged()
       } else if (data.type === 'error') {
         setError(data.message)
         setRunState('failed')
@@ -293,7 +297,12 @@ export function AnalysisTab({ config }: AnalysisTabProps) {
       )}
 
       {runState === 'completed' && jobId && (
-        <ResultsView jobId={jobId} files={outputFiles} />
+        <ResultsView
+          jobId={jobId}
+          files={outputFiles}
+          generatedFiles={generatedFiles}
+          filesLoading={filesLoading}
+        />
       )}
     </div>
   )

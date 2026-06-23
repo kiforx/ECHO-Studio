@@ -3,6 +3,7 @@ import type { Card, Config, DeckSummary } from '@/types'
 import { useConstants } from '@/hooks/useConstants'
 import { GeneralConfig } from './GeneralConfig'
 import { SimulationConfig } from './SimulationConfig'
+import { NominalChangeConfig } from './NominalChangeConfig'
 import { CustomSetIds } from './CustomSetIds'
 import { DeckManagement } from './DeckManagement'
 import { Separator } from '@/components/ui/Separator'
@@ -50,6 +51,7 @@ export function ConfigTab({
           saving={saving}
         />
         <SimulationConfig config={config} onSave={save} saving={saving} />
+        <NominalChangeConfig config={config} onSave={save} saving={saving} />
       </div>
 
       <CustomSetIds

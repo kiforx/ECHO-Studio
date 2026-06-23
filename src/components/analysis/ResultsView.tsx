@@ -1,5 +1,5 @@
 import { Download, FileText, Table } from 'lucide-react'
-import type { OutputFile } from '@/types'
+import type { GeneratedFile, OutputFile } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { buildDownloadUrl, buildDownloadZipUrl } from '@/api/analysis'
@@ -7,9 +7,18 @@ import { buildDownloadUrl, buildDownloadZipUrl } from '@/api/analysis'
 interface ResultsViewProps {
   jobId: string
   files: OutputFile[]
+  generatedFiles: GeneratedFile[]
+  filesLoading: boolean
 }
 
-export function ResultsView({ jobId, files }: ResultsViewProps) {
+export function ResultsView({ jobId, files: allFiles, generatedFiles, filesLoading }: ResultsViewProps) {
+  // Cross-check against the live on-disk listing so a file deleted from the
+  // Files tab disappears here too, instead of showing a stale/dead download link.
+  // While the live list hasn't loaded yet, fall back to the job's own file list
+  // rather than hiding everything.
+  const existingFilenames = new Set(generatedFiles.map((f) => f.filename))
+  const files = filesLoading ? allFiles : allFiles.filter((f) => existingFilenames.has(f.filename))
+
   if (files.length === 0) return null
 
   const txtFiles = files.filter((f) => f.filename.endsWith('.txt'))

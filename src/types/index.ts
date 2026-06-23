@@ -36,6 +36,10 @@ export interface Config {
   csv_set_range: [number, number]
   csv_single_set_index: number
   csv_custom_set_ids: number[]
+  // Nominal-change analysis
+  nominal_change_mode: 'legacy' | 'until_solution_found'
+  nominal_change_enable_single: boolean
+  nominal_change_enable_double: boolean
 }
 
 export interface Constants {

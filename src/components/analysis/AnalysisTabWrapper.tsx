@@ -1,13 +1,18 @@
 import { Layers } from 'lucide-react'
-import type { Config } from '@/types'
+import type { Config, GeneratedFile } from '@/types'
 import { AnalysisTab } from './AnalysisTab'
 
 interface AnalysisTabWrapperProps {
   config: Config | null
   noDeck: boolean
+  generatedFiles: GeneratedFile[]
+  filesLoading: boolean
+  onAnalysisFilesChanged: () => void
 }
 
-export function AnalysisTabWrapper({ config, noDeck }: AnalysisTabWrapperProps) {
+export function AnalysisTabWrapper({
+  config, noDeck, generatedFiles, filesLoading, onAnalysisFilesChanged,
+}: AnalysisTabWrapperProps) {
   if (noDeck || !config) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
@@ -24,5 +29,12 @@ export function AnalysisTabWrapper({ config, noDeck }: AnalysisTabWrapperProps) 
     )
   }
 
-  return <AnalysisTab config={config} />
+  return (
+    <AnalysisTab
+      config={config}
+      generatedFiles={generatedFiles}
+      filesLoading={filesLoading}
+      onFilesChanged={onAnalysisFilesChanged}
+    />
+  )
 }
