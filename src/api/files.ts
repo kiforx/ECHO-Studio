@@ -13,6 +13,11 @@ export async function deleteGeneratedFile(filename: string): Promise<void> {
   await api.delete(`/files/${encodeURIComponent(filename)}`)
 }
 
+export async function bulkDeleteGeneratedFiles(filenames: string[]): Promise<{ deleted: string[]; not_found: string[] }> {
+  const { data } = await api.post('/files/bulk-delete', { filenames })
+  return data
+}
+
 // job_id IS the client_id; a plain <a href download> cannot carry the
 // X-Client-ID header, so the client_id is embedded in the path instead.
 export function buildFileDownloadUrl(filename: string): string {

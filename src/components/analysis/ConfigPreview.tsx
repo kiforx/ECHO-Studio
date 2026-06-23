@@ -15,6 +15,14 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
+function nominalModeLabel(mode: Config['nominal_change_mode']): string {
+  return mode === 'until_solution_found' ? 'Until Solution Found' : 'Legacy'
+}
+
+function enabledBadge(enabled: boolean): React.ReactNode {
+  return enabled ? <Badge variant="success">Enabled</Badge> : <Badge variant="muted">Disabled</Badge>
+}
+
 function csvModeLabel(cfg: Config): React.ReactNode {
   switch (cfg.csv_export_mode) {
     case 'all': return 'All sets'
@@ -73,6 +81,9 @@ export function ConfigPreview({ config }: ConfigPreviewProps) {
             )
           } />
           <Row label="CSV Filter" value={csvModeLabel(config)} />
+          <Row label="Nominal-Change Mode" value={nominalModeLabel(config.nominal_change_mode)} />
+          <Row label="Single-Change Analysis" value={enabledBadge(config.nominal_change_enable_single)} />
+          <Row label="Double-Change Analysis" value={enabledBadge(config.nominal_change_enable_double)} />
         </div>
       </CardContent>
     </Card>

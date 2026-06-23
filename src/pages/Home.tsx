@@ -153,6 +153,7 @@ export function Home() {
                 error={generatedFiles.error}
                 reload={generatedFiles.reload}
                 remove={generatedFiles.remove}
+                removeMany={generatedFiles.removeMany}
               />
             </TabsPrimitive.Content>
           </div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchGeneratedFiles, deleteGeneratedFile } from '@/api/files'
+import { fetchGeneratedFiles, deleteGeneratedFile, bulkDeleteGeneratedFiles } from '@/api/files'
 import type { GeneratedFile } from '@/types'
 
 export function useGeneratedFiles() {
@@ -30,5 +30,14 @@ export function useGeneratedFiles() {
     [reload]
   )
 
-  return { files, totalSizeBytes, loading, error, reload, remove }
+  const removeMany = useCallback(
+    async (filenames: string[]) => {
+      const result = await bulkDeleteGeneratedFiles(filenames)
+      reload()
+      return result
+    },
+    [reload]
+  )
+
+  return { files, totalSizeBytes, loading, error, reload, remove, removeMany }
 }
