@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { Settings2, BarChart3, Zap, Loader2, AlertCircle } from 'lucide-react'
+import { Settings2, BarChart3, FolderOpen, Zap, Loader2, AlertCircle } from 'lucide-react'
 import type { Card } from '@/types'
 import { useConfig } from '@/hooks/useConfig'
 import { useDecks } from '@/hooks/useDecks'
 import { fetchDeck } from '@/api/decks'
 import { ConfigTab } from '@/components/config/ConfigTab'
 import { AnalysisTabWrapper } from '@/components/analysis/AnalysisTabWrapper'
+import { GeneratedFilesTab } from '@/components/files/GeneratedFilesTab'
 import { cn } from '@/lib/utils'
 
 function TabTrigger({ value, icon: Icon, label }: { value: string; icon: React.ElementType; label: string }) {
@@ -104,6 +105,7 @@ export function Home() {
             <TabsPrimitive.List className="flex gap-0">
               <TabTrigger value="config" icon={Settings2} label="Configurations" />
               <TabTrigger value="analysis" icon={BarChart3} label="Analysis" />
+              <TabTrigger value="files" icon={FolderOpen} label="Files" />
             </TabsPrimitive.List>
           </div>
         </div>
@@ -131,6 +133,12 @@ export function Home() {
               className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
             >
               <AnalysisTabWrapper config={config} noDeck={noDeck} />
+            </TabsPrimitive.Content>
+            <TabsPrimitive.Content
+              value="files"
+              className="outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 duration-200"
+            >
+              <GeneratedFilesTab />
             </TabsPrimitive.Content>
           </div>
         </div>

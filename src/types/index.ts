@@ -70,6 +70,17 @@ export interface JobSummary {
   error: string | null
 }
 
+export interface GeneratedFile {
+  filename: string
+  size_bytes: number
+  modified_at: string
+}
+
+export interface GeneratedFilesResponse {
+  files: GeneratedFile[]
+  total_size_bytes: number
+}
+
 export type ProgressEventType =
   | { type: 'phase_start'; phase: number; total: number; name: string; pct: number; message: string }
   | { type: 'phase_complete'; phase: number; total: number; name: string; pct: number; message: string }
